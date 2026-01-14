@@ -1,0 +1,1719 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+    <title>ViewportArchitect | Responsive Development Workspace</title>
+    <style>
+        /* =========================================
+           1. CORE VARIABLES & RESET
+           ========================================= */
+        :root {
+            /* Base Dimensions */
+            --header-height: 60px;
+            --header-height-mobile: 50px;
+            --sidebar-width: 260px;
+            --sidebar-width-mobile: 280px;
+            --control-panel-height: 50px;
+            --border-radius: 8px;
+            --transition-speed: 0.3s;
+            --font-main: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            --font-mono: 'Consolas', 'Monaco', monospace;
+
+            /* Default Theme (Professional Dark) */
+            --bg-body: #121212;
+            --bg-panel: #1e1e1e;
+            --bg-surface: #252525;
+            --text-main: #e0e0e0;
+            --text-muted: #a0a0a0;
+            --accent-color: #3b82f6;
+            --accent-hover: #2563eb;
+            --border-color: #333333;
+            --shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+            --success: #10b981;
+            --danger: #ef4444;
+        }
+
+        /* RESET & BASE STYLES */
+        * { 
+            box-sizing: border-box; 
+            margin: 0; 
+            padding: 0; 
+            outline: none; 
+        }
+        
+        body {
+            font-family: var(--font-main);
+            background-color: var(--bg-body);
+            color: var(--text-main);
+            min-height: 100vh;
+            overflow-x: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* =========================================
+           2. THEME DEFINITIONS
+           ========================================= */
+        [data-theme="solarized"] {
+            --bg-body: #fdf6e3; --bg-panel: #eee8d5; --bg-surface: #fdf6e3;
+            --text-main: #073642; --text-muted: #586e75; --accent-color: #d33682;
+            --accent-hover: #b58900; --border-color: #93a1a1;
+        }
+        [data-theme="ocean"] {
+            --bg-body: #0f172a; --bg-panel: #1e293b; --bg-surface: #334155;
+            --text-main: #f1f5f9; --text-muted: #94a3b8; --accent-color: #06b6d4;
+            --accent-hover: #0891b2; --border-color: #1e293b;
+        }
+        [data-theme="forest"] {
+            --bg-body: #1a202c; --bg-panel: #222d32; --bg-surface: #2f3a3f;
+            --text-main: #e2e8f0; --text-muted: #a0aec0; --accent-color: #48bb78;
+            --accent-hover: #38a169; --border-color: #2d3748;
+        }
+        [data-theme="cyberpunk"] {
+            --bg-body: #050505; --bg-panel: #111; --bg-surface: #222;
+            --text-main: #fff; --text-muted: #888; --accent-color: #f0f;
+            --accent-hover: #d0d; --border-color: #333; --shadow: 0 0 10px #f0f;
+        }
+        [data-theme="monochrome"] {
+            --bg-body: #ffffff; --bg-panel: #f3f3f3; --bg-surface: #ffffff;
+            --text-main: #000000; --text-muted: #666666; --accent-color: #000000;
+            --accent-hover: #333333; --border-color: #ddd;
+        }
+        [data-theme="sunset"] {
+            --bg-body: #2d1b2e; --bg-panel: #442638; --bg-surface: #583245;
+            --text-main: #ffccbc; --text-muted: #b3887c; --accent-color: #ff5722;
+            --accent-hover: #e64a19; --border-color: #5d4037;
+        }
+        [data-theme="royal"] {
+            --bg-body: #180829; --bg-panel: #2b1245; --bg-surface: #3d1a61;
+            --text-main: #e9d8fd; --text-muted: #9f7aea; --accent-color: #d6bcfa;
+            --accent-hover: #b794f4; --border-color: #44337a;
+        }
+
+        /* =========================================
+           3. UI COMPONENTS & LAYOUT - DESKTOP FIRST
+           ========================================= */
+        
+        /* HEADER */
+        header {
+            height: var(--header-height);
+            background-color: var(--bg-panel);
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            padding: 0 20px;
+            justify-content: space-between;
+            z-index: 100;
+            flex-shrink: 0;
+        }
+        
+        .brand { 
+            font-weight: 700; 
+            font-size: 1.2rem; 
+            letter-spacing: -0.5px; 
+            color: var(--accent-color);
+            white-space: nowrap;
+        }
+        
+        .url-bar-container {
+            flex: 1;
+            max-width: 600px;
+            margin: 0 20px;
+            display: flex;
+            min-width: 0; /* Allows shrinking */
+        }
+        
+        input[type="text"], input[type="number"], select, textarea {
+            background: var(--bg-body);
+            border: 1px solid var(--border-color);
+            color: var(--text-main);
+            padding: 8px 12px;
+            border-radius: 4px;
+            font-family: var(--font-main);
+            font-size: 14px;
+        }
+        
+        input[type="text"]:focus, input[type="number"]:focus, select:focus, textarea:focus {
+            border-color: var(--accent-color);
+            box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1);
+        }
+        
+        .url-input { 
+            flex: 1; 
+            min-width: 50px;
+            border-top-right-radius: 0; 
+            border-bottom-right-radius: 0; 
+            font-size: 14px;
+        }
+        
+        .btn-go {
+            border-top-left-radius: 0; 
+            border-bottom-left-radius: 0;
+            background: var(--accent-color); 
+            color: #fff; 
+            border: none; 
+            padding: 0 20px; 
+            cursor: pointer;
+            font-weight: 600;
+            transition: background-color var(--transition-speed);
+            white-space: nowrap;
+        }
+        
+        .btn-go:hover { 
+            background: var(--accent-hover); 
+        }
+
+        .header-actions { 
+            display: flex; 
+            gap: 10px; 
+            align-items: center; 
+            flex-shrink: 0;
+        }
+        
+        .btn-secondary {
+            background: var(--bg-surface); 
+            color: var(--text-main); 
+            border: 1px solid var(--border-color);
+            padding: 6px 12px; 
+            border-radius: 4px; 
+            cursor: pointer; 
+            font-size: 0.9rem;
+            transition: all var(--transition-speed);
+            white-space: nowrap;
+        }
+        
+        .btn-secondary:hover { 
+            border-color: var(--accent-color); 
+            background: var(--bg-body);
+        }
+
+        .btn-primary {
+            background: var(--accent-color); 
+            color: #fff; 
+            border: none;
+            padding: 8px 16px; 
+            border-radius: 4px; 
+            cursor: pointer; 
+            font-size: 0.9rem;
+            transition: background-color var(--transition-speed);
+            font-weight: 600;
+        }
+        
+        .btn-primary:hover { 
+            background: var(--accent-hover); 
+        }
+
+        /* Mobile Menu Button (Hidden by Default) */
+        .mobile-menu-btn {
+            display: none;
+            background: none;
+            border: none;
+            color: var(--text-main);
+            font-size: 1.5rem;
+            cursor: pointer;
+            padding: 5px;
+            margin-right: 10px;
+        }
+
+        /* LAYOUT CONTAINER */
+        .layout { 
+            display: flex; 
+            flex: 1; 
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* SIDEBAR */
+        aside {
+            width: var(--sidebar-width);
+            background: var(--bg-panel);
+            border-right: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            padding: 15px;
+            overflow-y: auto;
+            flex-shrink: 0;
+            transition: transform var(--transition-speed);
+            z-index: 90;
+        }
+        
+        .section-title {
+            font-size: 0.75rem; 
+            text-transform: uppercase; 
+            letter-spacing: 1px;
+            color: var(--text-muted); 
+            margin-bottom: 10px; 
+            margin-top: 20px;
+        }
+        
+        .section-title:first-child { 
+            margin-top: 0; 
+        }
+        
+        .preset-grid { 
+            display: grid; 
+            grid-template-columns: 1fr 1fr; 
+            gap: 8px; 
+        }
+        
+        .preset-btn {
+            background: var(--bg-surface); 
+            border: 1px solid var(--border-color);
+            color: var(--text-main); 
+            padding: 10px; 
+            border-radius: var(--border-radius);
+            cursor: pointer; 
+            text-align: left; 
+            font-size: 0.85rem; 
+            transition: var(--transition-speed);
+        }
+        
+        .preset-btn:hover { 
+            border-color: var(--accent-color); 
+            background: var(--bg-body); 
+        }
+        
+        .preset-btn span { 
+            display: block; 
+            font-size: 0.7rem; 
+            color: var(--text-muted); 
+            margin-top: 2px; 
+        }
+
+        .custom-device-form {
+            background: var(--bg-surface); 
+            padding: 10px; 
+            border-radius: var(--border-radius);
+            display: grid; 
+            gap: 8px;
+        }
+        
+        .form-row { 
+            display: flex; 
+            gap: 5px; 
+        }
+
+        /* Mobile Sidebar Overlay */
+        .sidebar-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 85;
+        }
+
+        /* WORKBENCH (CANVAS) */
+        main {
+            flex: 1;
+            background-color: var(--bg-body);
+            overflow: auto;
+            padding: 20px;
+            position: relative;
+            /* Grid background pattern */
+            background-image: radial-gradient(var(--border-color) 1px, transparent 1px);
+            background-size: 20px 20px;
+        }
+        
+        .device-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            align-items: flex-start;
+            justify-content: center;
+            min-height: 100%;
+        }
+
+        /* DEVICE FRAME */
+        .device-card {
+            background: transparent;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            position: relative;
+            width: 100%;
+            max-width: 100%;
+        }
+        
+        .device-header {
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center;
+            margin-bottom: 8px; 
+            font-size: 0.85rem; 
+            color: var(--text-muted);
+            width: 100%;
+            flex-wrap: wrap;
+            gap: 5px;
+        }
+        
+        .device-title { 
+            font-weight: 600; 
+            color: var(--text-main); 
+            margin-right: 8px;
+        }
+        
+        .device-controls button {
+            background: none; 
+            border: none; 
+            color: var(--text-muted); 
+            cursor: pointer; 
+            padding: 2px 5px;
+            font-size: 1rem;
+        }
+        
+        .device-controls button:hover { 
+            color: var(--accent-color); 
+        }
+        
+        /* The Wrapper handles the CSS transform scale */
+        .viewport-wrapper {
+            background: #fff;
+            box-shadow: var(--shadow);
+            overflow: hidden;
+            transition: width 0.3s, height 0.3s;
+            position: relative;
+            width: 100%;
+            max-width: 100%;
+        }
+        
+        /* The Iframe is the actual size */
+        iframe {
+            width: 100%; 
+            height: 100%; 
+            border: none; 
+            background: #fff;
+            transform-origin: 0 0; 
+            display: block;
+        }
+        
+        /* FOOTER / CREDITS */
+        .credits-bar {
+            position: fixed; 
+            bottom: 0; 
+            right: 0;
+            background: var(--bg-panel); 
+            border-top-left-radius: 8px;
+            padding: 5px 15px; 
+            border-top: 1px solid var(--border-color); 
+            border-left: 1px solid var(--border-color);
+            font-size: 0.75rem; 
+            color: var(--text-muted); 
+            z-index: 99;
+        }
+        
+        .credits-bar a { 
+            color: var(--accent-color); 
+            text-decoration: none; 
+        }
+
+        /* MODALS */
+        .modal-overlay {
+            position: fixed; 
+            top: 0; 
+            left: 0; 
+            width: 100%; 
+            height: 100%;
+            background: rgba(0,0,0,0.7); 
+            display: none; 
+            justify-content: center; 
+            align-items: center; 
+            z-index: 1000;
+            padding: 20px;
+        }
+        
+        .modal-overlay.active { 
+            display: flex; 
+        }
+        
+        .modal {
+            background: var(--bg-panel); 
+            padding: 25px; 
+            border-radius: var(--border-radius);
+            width: 600px; 
+            max-width: 100%; 
+            max-height: 90vh;
+            overflow-y: auto;
+            border: 1px solid var(--border-color);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+        
+        .modal h2 { 
+            margin-bottom: 15px; 
+            color: var(--accent-color); 
+            font-size: 1.5rem;
+        }
+        
+        .modal p, .modal li { 
+            font-size: 0.9rem; 
+            line-height: 1.5; 
+            color: var(--text-main); 
+            margin-bottom: 10px; 
+        }
+        
+        .modal ul { 
+            margin-left: 20px; 
+            margin-bottom: 15px; 
+        }
+        
+        .modal-footer { 
+            margin-top: 20px; 
+            text-align: right; 
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+        }
+        
+        textarea.export-area {
+            width: 100%; 
+            height: 100px; 
+            background: var(--bg-body); 
+            color: var(--text-main);
+            border: 1px solid var(--border-color); 
+            padding: 10px; 
+            font-family: var(--font-mono); 
+            font-size: 0.8rem;
+            resize: vertical;
+        }
+
+        .html-paste-area {
+            width: 100%; 
+            height: 300px; 
+            background: var(--bg-body); 
+            color: var(--text-main);
+            border: 1px solid var(--border-color); 
+            padding: 12px; 
+            font-family: var(--font-mono); 
+            font-size: 0.85rem;
+            resize: vertical;
+            margin: 15px 0;
+            line-height: 1.4;
+        }
+
+        .paste-info {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            margin: 5px 0 15px 0;
+            font-style: italic;
+        }
+
+        .url-tabs {
+            display: flex;
+            border-bottom: 1px solid var(--border-color);
+            margin-bottom: 15px;
+        }
+
+        .url-tab {
+            padding: 10px 20px;
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            cursor: pointer;
+            font-size: 0.9rem;
+            position: relative;
+            transition: color var(--transition-speed);
+        }
+
+        .url-tab:hover {
+            color: var(--text-main);
+        }
+
+        .url-tab.active {
+            color: var(--accent-color);
+            font-weight: 600;
+        }
+
+        .url-tab.active::after {
+            content: '';
+            position: absolute;
+            bottom: -1px;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: var(--accent-color);
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        /* UTILITY CLASSES */
+        .hidden { 
+            display: none !important; 
+        }
+        
+        .badge {
+            font-size: 0.7rem; 
+            padding: 2px 6px; 
+            border-radius: 4px;
+            background: var(--bg-surface); 
+            border: 1px solid var(--border-color);
+        }
+
+        .status-indicator {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 0.8rem;
+            padding: 4px 8px;
+            border-radius: 4px;
+            background: var(--bg-surface);
+        }
+
+        .status-indicator .dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--text-muted);
+        }
+
+        .status-indicator.active .dot {
+            background: var(--success);
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 0.7; }
+            50% { opacity: 1; }
+            100% { opacity: 0.7; }
+        }
+
+        /* Zoom Control Adjustments */
+        .zoom-control {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            margin-right: 10px;
+            min-width: 140px;
+        }
+        
+        .zoom-control span {
+            font-size: 0.8rem; 
+            color: var(--text-muted);
+            white-space: nowrap;
+        }
+        
+        input[type="range"] {
+            width: 80px;
+            flex-shrink: 1;
+        }
+
+        /* =========================================
+           4. RESPONSIVE MEDIA QUERIES
+           ========================================= */
+
+        /* Tablet Landscape (1024px and below) */
+        @media screen and (max-width: 1024px) {
+            :root {
+                --sidebar-width: 240px;
+            }
+            
+            .url-bar-container {
+                max-width: 400px;
+            }
+            
+            .device-grid {
+                gap: 15px;
+            }
+            
+            main {
+                padding: 15px;
+            }
+        }
+
+        /* Tablet Portrait (768px and below) */
+        @media screen and (max-width: 768px) {
+            header {
+                height: var(--header-height-mobile);
+                padding: 0 15px;
+                flex-wrap: wrap;
+                gap: 10px;
+            }
+            
+            .brand {
+                font-size: 1.1rem;
+            }
+            
+            .mobile-menu-btn {
+                display: block;
+            }
+            
+            .url-bar-container {
+                order: 3;
+                flex: 0 0 100%;
+                margin: 0;
+                max-width: 100%;
+            }
+            
+            .header-actions {
+                margin-left: auto;
+            }
+            
+            .zoom-control {
+                min-width: 120px;
+            }
+            
+            input[type="range"] {
+                width: 60px;
+            }
+            
+            /* Sidebar Mobile Behavior */
+            aside {
+                position: fixed;
+                top: var(--header-height-mobile);
+                left: 0;
+                bottom: 0;
+                width: var(--sidebar-width-mobile);
+                transform: translateX(-100%);
+                z-index: 95;
+            }
+            
+            aside.mobile-open {
+                transform: translateX(0);
+            }
+            
+            .sidebar-overlay.active {
+                display: block;
+            }
+            
+            /* Adjust main content when sidebar is open on mobile */
+            .sidebar-open main {
+                transform: translateX(var(--sidebar-width-mobile));
+            }
+            
+            main {
+                padding: 15px 10px;
+                transition: transform var(--transition-speed);
+            }
+            
+            .device-grid {
+                gap: 15px;
+            }
+            
+            .modal {
+                padding: 15px;
+                width: 90%;
+            }
+            
+            .preset-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .btn-secondary, select, .btn-go {
+                padding: 8px 12px;
+            }
+
+            .url-tabs {
+                flex-wrap: wrap;
+            }
+
+            .url-tab {
+                padding: 8px 15px;
+                font-size: 0.85rem;
+            }
+
+            .html-paste-area {
+                height: 250px;
+            }
+        }
+
+        /* Mobile Devices (480px and below) */
+        @media screen and (max-width: 480px) {
+            header {
+                padding: 0 10px;
+                gap: 8px;
+            }
+            
+            .brand {
+                font-size: 1rem;
+            }
+            
+            .header-actions {
+                gap: 5px;
+            }
+            
+            .zoom-control {
+                min-width: 100px;
+                margin-right: 5px;
+            }
+            
+            input[type="range"] {
+                width: 50px;
+            }
+            
+            select#themeSelector {
+                max-width: 120px;
+                font-size: 0.8rem;
+            }
+            
+            .btn-secondary {
+                padding: 6px 8px;
+                font-size: 0.8rem;
+            }
+            
+            main {
+                padding: 10px 5px;
+            }
+            
+            .device-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 5px;
+            }
+            
+            .device-controls {
+                align-self: flex-end;
+            }
+            
+            .modal {
+                padding: 12px;
+                width: 95%;
+            }
+            
+            .modal h2 {
+                font-size: 1.3rem;
+            }
+            
+            .credits-bar {
+                font-size: 0.7rem;
+                padding: 4px 10px;
+            }
+            
+            :root {
+                --sidebar-width-mobile: 260px;
+            }
+
+            .url-tabs {
+                flex-direction: column;
+                border-bottom: none;
+            }
+
+            .url-tab {
+                text-align: left;
+                border-bottom: 1px solid var(--border-color);
+                padding: 10px;
+            }
+
+            .url-tab.active::after {
+                display: none;
+            }
+
+            .html-paste-area {
+                height: 200px;
+                font-size: 0.8rem;
+            }
+        }
+
+        /* Small Mobile Devices (360px and below) */
+        @media screen and (max-width: 360px) {
+            .header-actions {
+                flex-wrap: wrap;
+                justify-content: flex-end;
+            }
+            
+            .zoom-control {
+                order: 1;
+                flex: 0 0 100%;
+                justify-content: center;
+                margin: 5px 0;
+            }
+            
+            select#themeSelector {
+                order: 2;
+            }
+            
+            .btn-secondary {
+                order: 3;
+            }
+            
+            .url-input {
+                font-size: 13px;
+            }
+            
+            .preset-btn {
+                padding: 8px;
+                font-size: 0.8rem;
+            }
+            
+            .section-title {
+                font-size: 0.7rem;
+            }
+        }
+
+        /* High DPI / Retina Screens */
+        @media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+            .btn-go, .btn-secondary {
+                -webkit-font-smoothing: antialiased;
+                -moz-osx-font-smoothing: grayscale;
+            }
+        }
+
+        /* Touch Device Optimizations */
+        @media (hover: none) and (pointer: coarse) {
+            .btn-go, .btn-secondary, .preset-btn, .device-controls button {
+                min-height: 44px;
+                min-width: 44px;
+            }
+            
+            input[type="range"] {
+                height: 30px;
+            }
+            
+            select, input[type="text"], input[type="number"] {
+                font-size: 16px; /* Prevents iOS zoom on focus */
+                padding: 12px;
+            }
+        }
+
+        /* Print Styles */
+        @media print {
+            .mobile-menu-btn,
+            .credits-bar,
+            .device-controls,
+            .header-actions,
+            aside {
+                display: none !important;
+            }
+            
+            header {
+                position: static;
+                border: 1px solid #000;
+            }
+            
+            main {
+                overflow: visible;
+                background: none;
+            }
+            
+            .device-card {
+                break-inside: avoid;
+                page-break-inside: avoid;
+            }
+        }
+
+        /* Orientation Specific */
+        @media screen and (orientation: portrait) and (max-width: 768px) {
+            .layout {
+                flex-direction: column;
+            }
+            
+            .device-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media screen and (orientation: landscape) and (max-height: 600px) {
+            header {
+                height: 50px;
+            }
+            
+            aside {
+                padding-top: 10px;
+            }
+            
+            main {
+                padding: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Header -->
+    <header>
+        <button class="mobile-menu-btn" id="mobileMenuBtn">☰</button>
+        <div class="brand">Viewport<span style="color:var(--text-main)">Architect</span></div>
+        
+        <div class="url-bar-container">
+            <input type="text" id="urlInput" class="url-input" placeholder="Enter website URL or local file path (e.g., example.com or file:///C:/Users/...)" value="https://example.com">
+            <button class="btn-go" id="btnRefresh">GO</button>
+        </div>
+
+        <div class="header-actions">
+            <!-- Global Zoom Control -->
+            <div class="zoom-control">
+                <span>Zoom:</span>
+                <input type="range" id="globalScale" min="0.2" max="1.5" step="0.1" value="0.7">
+                <span id="scaleDisplay" style="min-width: 30px;">70%</span>
+            </div>
+
+            <!-- Theme Switcher -->
+            <select id="themeSelector">
+                <option value="default">Midnight (Default)</option>
+                <option value="cyberpunk">Cyberpunk</option>
+                <option value="solarized">Solarized</option>
+                <option value="ocean">Deep Ocean</option>
+                <option value="forest">Forest</option>
+                <option value="sunset">Sunset</option>
+                <option value="royal">Royal</option>
+                <option value="monochrome">Monochrome</option>
+            </select>
+
+            <!-- Paste HTML Button -->
+            <button class="btn-secondary" id="btnPasteHTML">Paste HTML</button>
+            <button class="btn-secondary" id="btnData">Data</button>
+            <button class="btn-secondary" id="btnHelp">?</button>
+        </div>
+    </header>
+
+    <!-- Mobile Sidebar Overlay -->
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+    <div class="layout">
+        <!-- Sidebar -->
+        <aside id="sidebar">
+            <div class="section-title">Common Devices</div>
+            <div class="preset-grid" id="presetList">
+                <!-- Populated by JS -->
+            </div>
+
+            <div class="section-title">Custom Viewport</div>
+            <div class="custom-device-form">
+                <input type="text" id="customName" placeholder="Device Name">
+                <div class="form-row">
+                    <input type="number" id="customW" placeholder="W (px)">
+                    <input type="number" id="customH" placeholder="H (px)">
+                </div>
+                <button class="btn-secondary" style="width:100%" id="btnAddCustom">Add Device</button>
+            </div>
+
+            <div class="section-title">Settings</div>
+            <button class="btn-secondary" id="btnReset" style="width:100%; text-align:center;">Reset Workspace</button>
+        </aside>
+
+        <!-- Main Workspace -->
+        <main id="workbench">
+            <div class="device-grid" id="deviceGrid">
+                <!-- Devices rendered here -->
+            </div>
+        </main>
+    </div>
+
+    <!-- Credits -->
+    <div class="credits-bar">
+        Made with ❤️ by <a href="https://GitHub.com/Aliriyaj007" target="_blank">Aliriyaj007</a>
+    </div>
+
+    <!-- Paste HTML Modal -->
+    <div class="modal-overlay" id="pasteModal">
+        <div class="modal">
+            <h2>Paste HTML Content</h2>
+            
+            <div class="url-tabs">
+                <button class="url-tab active" data-tab="paste">Paste HTML</button>
+                <button class="url-tab" data-tab="url">URL Input</button>
+            </div>
+            
+            <!-- Paste HTML Tab -->
+            <div class="tab-content active" id="pasteTab">
+                <p>Paste your complete HTML file content below. The HTML will be loaded as a standalone web app.</p>
+                <p class="paste-info">Tip: You can paste single HTML files containing inline CSS and JavaScript. Works with exported web apps!</p>
+                
+                <textarea class="html-paste-area" id="htmlPasteArea" placeholder="Paste your complete HTML file content here...
+For example:
+&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+&lt;head&gt;
+    &lt;title&gt;My App&lt;/title&gt;
+    &lt;style&gt;body { background: blue; }&lt;/style&gt;
+&lt;/head&gt;
+&lt;body&gt;
+    &lt;h1&gt;Hello World!&lt;/h1&gt;
+&lt;/body&gt;
+&lt;/html&gt;"></textarea>
+                
+                <div class="status-indicator" id="pasteStatus">
+                    <span class="dot"></span>
+                    <span id="statusText">Ready to paste HTML</span>
+                </div>
+                
+                <div class="modal-footer">
+                    <button class="btn-secondary" onclick="document.getElementById('pasteModal').classList.remove('active')">Cancel</button>
+                    <button class="btn-primary" id="btnLoadPastedHTML">Load HTML</button>
+                </div>
+            </div>
+            
+            <!-- URL Input Tab -->
+            <div class="tab-content" id="urlTab">
+                <p>Enter a website URL or local file path:</p>
+                
+                <div style="display: flex; margin: 15px 0;">
+                    <input type="text" id="modalUrlInput" class="url-input" placeholder="https://example.com or file:///path/to/file.html" style="flex: 1;">
+                    <button class="btn-go" id="btnModalGo">GO</button>
+                </div>
+                
+                <p class="paste-info">For local files, use file:// protocol (e.g., file:///C:/Users/...)</p>
+                
+                <div class="modal-footer">
+                    <button class="btn-secondary" onclick="document.getElementById('pasteModal').classList.remove('active')">Cancel</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Help Modal -->
+    <div class="modal-overlay" id="helpModal">
+        <div class="modal">
+            <h2>User Guide</h2>
+            <p><strong>Overview:</strong> ViewportArchitect allows you to test responsive web designs across multiple screen sizes simultaneously without resizing your browser.</p>
+            <ul>
+                <li><strong>URL:</strong> Enter any web URL or local file path (e.g., example.com or file:///C:/Users/...). 
+                    For local files, ensure you have permission to access them.</li>
+                <li><strong>Paste HTML:</strong> Click "Paste HTML" to directly paste a complete HTML file content. Works with single-file web apps!</li>
+                <li><strong>Local Files:</strong> Use file:// protocol (e.g., file:///C:/folder/file.html) or 
+                    simply paste a full path like C:\Users\folder\index.html</li>
+                <li><strong>Zoom:</strong> Use the global slider to scale viewports down to fit your monitor.</li>
+                <li><strong>Custom Devices:</strong> Add specific dimensions via the sidebar.</li>
+                <li><strong>Themes:</strong> Choose from 8 premium themes to suit your environment.</li>
+                <li><strong>Mobile:</strong> Use the ☰ menu button to access sidebar on mobile devices.</li>
+            </ul>
+            <p style="font-size:0.8rem; color:var(--text-muted); margin-top:10px;">
+                <strong>Note:</strong> Local file access may be restricted by your browser's security settings. 
+                For best results with local files, open this app via file:// protocol (double-click the HTML file).
+            </p>
+            <div class="modal-footer">
+                <button class="btn-secondary" onclick="document.getElementById('helpModal').classList.remove('active')">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Data Modal -->
+    <div class="modal-overlay" id="dataModal">
+        <div class="modal">
+            <h2>Import / Export</h2>
+            <p>Save your workspace configuration or load a previous setup.</p>
+            
+            <div class="form-row" style="margin-bottom:10px;">
+                <button class="btn-secondary" id="btnExport" style="flex:1">Export JSON</button>
+                <label class="btn-secondary" style="flex:1; text-align:center; cursor:pointer">
+                    Import JSON <input type="file" id="fileImport" style="display:none" accept=".json">
+                </label>
+            </div>
+
+            <p style="font-size:0.8rem; color:var(--text-muted)">Preview (Export):</p>
+            <textarea class="export-area" id="exportPreview" readonly></textarea>
+
+            <div class="modal-footer">
+                <button class="btn-secondary" onclick="document.getElementById('dataModal').classList.remove('active')">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- JAVASCRIPT LOGIC -->
+    <script>
+        /**
+         * ViewportArchitect Core Logic - Enhanced with HTML Paste Feature
+         */
+
+        const App = (() => {
+
+            // --- 1. CONFIG & PRESETS ---
+            const DEFAULT_PRESETS = [
+                { name: 'iPhone SE', width: 375, height: 667 },
+                { name: 'iPhone 14', width: 393, height: 852 },
+                { name: 'Pixel 7', width: 412, height: 915 },
+                { name: 'iPad Mini', width: 768, height: 1024 },
+                { name: 'iPad Pro', width: 1024, height: 1366 },
+                { name: 'Laptop', width: 1366, height: 768 },
+                { name: 'Desktop', width: 1920, height: 1080 }
+            ];
+
+            const DEFAULT_STATE = {
+                url: 'https://en.wikipedia.org/wiki/Responsive_web_design',
+                globalScale: 0.6,
+                theme: 'default',
+                activeDevices: [
+                    { id: 'd1', name: 'iPhone 14', width: 393, height: 852 },
+                    { id: 'd2', name: 'iPad Mini', width: 768, height: 1024 },
+                    { id: 'd3', name: 'Laptop', width: 1366, height: 768 }
+                ],
+                mobileSidebarOpen: false,
+                currentSourceType: 'url' // 'url' or 'pasted'
+            };
+
+            // --- URL Processing Function ---
+            function processURL(url) {
+                const trimmedUrl = url.trim();
+                
+                // Handle file:// URLs - keep them as is
+                if (trimmedUrl.startsWith('file://')) {
+                    return trimmedUrl;
+                }
+                
+                // Handle local file paths without protocol
+                if (trimmedUrl.includes('\\') || trimmedUrl.includes('/') || 
+                    trimmedUrl.endsWith('.html') || trimmedUrl.endsWith('.htm')) {
+                    // If it looks like a local path, convert to file:// URL
+                    // Windows paths like C:\Users\... or C:/Users/...
+                    if (trimmedUrl.match(/^[A-Za-z]:[\\\/]/) || trimmedUrl.startsWith('/')) {
+                        return 'file:///' + trimmedUrl.replace(/\\/g, '/');
+                    }
+                }
+                
+                // Handle regular web URLs
+                if (!/^https?:\/\//i.test(trimmedUrl)) {
+                    return 'https://' + trimmedUrl;
+                }
+                
+                return trimmedUrl;
+            }
+
+            // --- HTML Paste Handler ---
+            function createBlobUrlFromHTML(htmlContent) {
+                try {
+                    // Create a blob from the HTML content
+                    const blob = new Blob([htmlContent], { type: 'text/html' });
+                    const blobUrl = URL.createObjectURL(blob);
+                    
+                    // Store in sessionStorage for persistence across page reloads
+                    sessionStorage.setItem('vp_architect_pasted_html', htmlContent);
+                    sessionStorage.setItem('vp_architect_source_type', 'pasted');
+                    
+                    return blobUrl;
+                } catch (error) {
+                    console.error('Error creating blob URL:', error);
+                    return null;
+                }
+            }
+
+            // --- 2. STATE MANAGER ---
+            const Store = {
+                state: {},
+                init() {
+                    const saved = localStorage.getItem('vp_architect_config');
+                    if (saved) {
+                        try {
+                            this.state = { ...DEFAULT_STATE, ...JSON.parse(saved) };
+                        } catch (e) {
+                            console.error("Save file corrupted, resetting", e);
+                            this.state = { ...DEFAULT_STATE };
+                        }
+                    } else {
+                        this.state = { ...DEFAULT_STATE };
+                    }
+                    
+                    // Check if we have pasted HTML in sessionStorage
+                    const pastedHTML = sessionStorage.getItem('vp_architect_pasted_html');
+                    const sourceType = sessionStorage.getItem('vp_architect_source_type');
+                    
+                    if (pastedHTML && sourceType === 'pasted') {
+                        const blobUrl = createBlobUrlFromHTML(pastedHTML);
+                        if (blobUrl) {
+                            this.state.url = blobUrl;
+                            this.state.currentSourceType = 'pasted';
+                        }
+                    }
+                    
+                    this.save();
+                },
+                save() {
+                    localStorage.setItem('vp_architect_config', JSON.stringify(this.state));
+                    const preview = document.getElementById('exportPreview');
+                    if(preview) preview.value = JSON.stringify(this.state, null, 2);
+                },
+                update(key, value) {
+                    this.state[key] = value;
+                    this.save();
+                },
+                addDevice(device) {
+                    this.state.activeDevices.push({ ...device, id: 'd_' + Date.now() });
+                    this.save();
+                    DeviceManager.render();
+                },
+                removeDevice(id) {
+                    this.state.activeDevices = this.state.activeDevices.filter(d => d.id !== id);
+                    this.save();
+                    DeviceManager.render();
+                },
+                rotateDevice(id) {
+                    const devIndex = this.state.activeDevices.findIndex(d => d.id === id);
+                    if(devIndex > -1) {
+                        const dev = this.state.activeDevices[devIndex];
+                        const temp = dev.width;
+                        dev.width = dev.height;
+                        dev.height = temp;
+                        this.save();
+                        DeviceManager.render();
+                    }
+                },
+                toggleMobileSidebar() {
+                    this.state.mobileSidebarOpen = !this.state.mobileSidebarOpen;
+                    this.save();
+                    this.updateMobileSidebar();
+                },
+                updateMobileSidebar() {
+                    const sidebar = document.getElementById('sidebar');
+                    const overlay = document.getElementById('sidebarOverlay');
+                    const main = document.getElementById('workbench');
+                    
+                    if (this.state.mobileSidebarOpen) {
+                        sidebar.classList.add('mobile-open');
+                        overlay.classList.add('active');
+                        document.body.classList.add('sidebar-open');
+                    } else {
+                        sidebar.classList.remove('mobile-open');
+                        overlay.classList.remove('active');
+                        document.body.classList.remove('sidebar-open');
+                    }
+                },
+                reset() {
+                    // Clear sessionStorage for pasted HTML
+                    sessionStorage.removeItem('vp_architect_pasted_html');
+                    sessionStorage.removeItem('vp_architect_source_type');
+                    
+                    this.state = { ...DEFAULT_STATE };
+                    this.save();
+                    location.reload();
+                },
+                updateSourceType(type) {
+                    this.state.currentSourceType = type;
+                    this.save();
+                }
+            };
+
+            // --- 3. THEME MANAGER ---
+            const ThemeManager = {
+                init() {
+                    this.apply(Store.state.theme);
+                    document.getElementById('themeSelector').value = Store.state.theme;
+                },
+                apply(themeName) {
+                    if (themeName === 'default') {
+                        document.body.removeAttribute('data-theme');
+                    } else {
+                        document.body.setAttribute('data-theme', themeName);
+                    }
+                    Store.update('theme', themeName);
+                }
+            };
+
+            // --- 4. DEVICE MANAGER (RENDERER) ---
+            const DeviceManager = {
+                container: document.getElementById('deviceGrid'),
+                
+                calculateOptimalScale(deviceWidth) {
+                    const { globalScale } = Store.state;
+                    const viewportWidth = window.innerWidth;
+                    
+                    // On mobile, adjust scale automatically
+                    if (viewportWidth < 768) {
+                        const availableWidth = viewportWidth - 40; // Account for padding
+                        const deviceCardWidth = Math.min(deviceWidth, availableWidth);
+                        return Math.min(globalScale, availableWidth / deviceWidth);
+                    }
+                    
+                    return globalScale;
+                },
+                
+                render() {
+                    this.container.innerHTML = '';
+                    const { activeDevices, url, currentSourceType } = Store.state;
+
+                    // Update the URL input field to show appropriate value
+                    const urlInput = document.getElementById('urlInput');
+                    if (currentSourceType === 'pasted') {
+                        urlInput.value = '[Pasted HTML Content]';
+                        urlInput.style.color = 'var(--accent-color)';
+                        urlInput.style.fontStyle = 'italic';
+                    } else {
+                        urlInput.value = url;
+                        urlInput.style.color = '';
+                        urlInput.style.fontStyle = '';
+                    }
+
+                    activeDevices.forEach(device => {
+                        const card = document.createElement('div');
+                        card.className = 'device-card';
+                        
+                        const optimalScale = this.calculateOptimalScale(device.width);
+                        const scaledW = Math.floor(device.width * optimalScale);
+                        const scaledH = Math.floor(device.height * optimalScale);
+
+                        card.innerHTML = `
+                            <div class="device-header">
+                                <div>
+                                    <span class="device-title">${device.name}</span>
+                                    <span class="badge">${device.width} x ${device.height}</span>
+                                    ${currentSourceType === 'pasted' ? '<span class="badge" style="background:var(--accent-color);color:#fff;">Pasted</span>' : ''}
+                                </div>
+                                <div class="device-controls">
+                                    <button onclick="App.rotate('${device.id}')" title="Rotate">↻</button>
+                                    <button onclick="App.remove('${device.id}')" title="Remove" style="color:var(--danger)">×</button>
+                                </div>
+                            </div>
+                            <div class="viewport-wrapper" style="width:${scaledW}px; height:${scaledH}px; border-radius: ${optimalScale < 0.5 ? 2 : 4}px">
+                                <iframe 
+                                    src="${url}" 
+                                    style="width:${device.width}px; height:${device.height}px; transform: scale(${optimalScale});"
+                                    sandbox="allow-scripts allow-same-origin allow-forms allow-modals allow-popups"
+                                    loading="lazy"
+                                    title="${device.name} - ${device.width}x${device.height}"
+                                ></iframe>
+                            </div>
+                        `;
+                        this.container.appendChild(card);
+                    });
+                }
+            };
+
+            // --- 5. UI MANAGER ---
+            const UIManager = {
+                init() {
+                    // Mobile sidebar setup
+                    Store.updateMobileSidebar();
+                    
+                    // Mobile menu button
+                    document.getElementById('mobileMenuBtn').addEventListener('click', () => {
+                        Store.toggleMobileSidebar();
+                    });
+                    
+                    // Sidebar overlay click to close
+                    document.getElementById('sidebarOverlay').addEventListener('click', () => {
+                        Store.state.mobileSidebarOpen = false;
+                        Store.updateMobileSidebar();
+                    });
+
+                    // 1. Sidebar Presets
+                    const list = document.getElementById('presetList');
+                    DEFAULT_PRESETS.forEach(p => {
+                        const btn = document.createElement('div');
+                        btn.className = 'preset-btn';
+                        btn.innerHTML = `${p.name} <span>${p.width} x ${p.height}</span>`;
+                        btn.onclick = () => {
+                            Store.addDevice(p);
+                            // Close mobile sidebar after adding device
+                            if (window.innerWidth <= 768) {
+                                Store.state.mobileSidebarOpen = false;
+                                Store.updateMobileSidebar();
+                            }
+                        };
+                        list.appendChild(btn);
+                    });
+
+                    // 2. Event Listeners
+                    
+                    // URL Handling with Local File Support
+                    document.getElementById('btnRefresh').addEventListener('click', () => {
+                        let url = document.getElementById('urlInput').value.trim();
+                        
+                        // If showing pasted content, open paste modal instead
+                        if (url === '[Pasted HTML Content]' || Store.state.currentSourceType === 'pasted') {
+                            document.getElementById('pasteModal').classList.add('active');
+                            this.switchTab('paste');
+                            return;
+                        }
+                        
+                        // Process URL for both web and local files
+                        url = processURL(url);
+                        
+                        // Update the input field with processed URL
+                        document.getElementById('urlInput').value = url;
+                        
+                        // Update state and render
+                        Store.update('url', url);
+                        Store.updateSourceType('url');
+                        DeviceManager.render();
+                    });
+
+                    // Enter key support for URL input
+                    document.getElementById('urlInput').addEventListener('keypress', (e) => {
+                        if (e.key === 'Enter') {
+                            let url = document.getElementById('urlInput').value.trim();
+                            
+                            // If showing pasted content, open paste modal instead
+                            if (url === '[Pasted HTML Content]' || Store.state.currentSourceType === 'pasted') {
+                                document.getElementById('pasteModal').classList.add('active');
+                                this.switchTab('paste');
+                                return;
+                            }
+                            
+                            url = processURL(url);
+                            document.getElementById('urlInput').value = url;
+                            Store.update('url', url);
+                            Store.updateSourceType('url');
+                            DeviceManager.render();
+                        }
+                    });
+
+                    // Scale
+                    const scaleInput = document.getElementById('globalScale');
+                    const scaleDisplay = document.getElementById('scaleDisplay');
+                    
+                    scaleInput.value = Store.state.globalScale;
+                    scaleDisplay.innerText = Math.round(Store.state.globalScale * 100) + '%';
+
+                    scaleInput.addEventListener('input', (e) => {
+                        const val = parseFloat(e.target.value);
+                        scaleDisplay.innerText = Math.round(val * 100) + '%';
+                        Store.update('globalScale', val);
+                        DeviceManager.render();
+                    });
+
+                    // Theme
+                    document.getElementById('themeSelector').addEventListener('change', (e) => {
+                        ThemeManager.apply(e.target.value);
+                    });
+
+                    // Custom Device
+                    document.getElementById('btnAddCustom').addEventListener('click', () => {
+                        const name = document.getElementById('customName').value || 'Custom';
+                        const w = parseInt(document.getElementById('customW').value);
+                        const h = parseInt(document.getElementById('customH').value);
+                        if(w && h) {
+                            Store.addDevice({ name, width: w, height: h });
+                            document.getElementById('customName').value = '';
+                            document.getElementById('customW').value = '';
+                            document.getElementById('customH').value = '';
+                            
+                            // Close mobile sidebar after adding
+                            if (window.innerWidth <= 768) {
+                                Store.state.mobileSidebarOpen = false;
+                                Store.updateMobileSidebar();
+                            }
+                        } else {
+                            alert("Please enter valid dimensions");
+                        }
+                    });
+
+                    // Reset
+                    document.getElementById('btnReset').addEventListener('click', () => {
+                        if(confirm('Reset workspace to defaults?')) Store.reset();
+                    });
+
+                    // Paste HTML Button
+                    document.getElementById('btnPasteHTML').addEventListener('click', () => {
+                        document.getElementById('pasteModal').classList.add('active');
+                        this.switchTab('paste');
+                        
+                        // Auto-focus the textarea
+                        setTimeout(() => {
+                            document.getElementById('htmlPasteArea').focus();
+                        }, 100);
+                    });
+
+                    // Load Pasted HTML
+                    document.getElementById('btnLoadPastedHTML').addEventListener('click', () => {
+                        const htmlContent = document.getElementById('htmlPasteArea').value.trim();
+                        
+                        if (!htmlContent) {
+                            alert("Please paste some HTML content first!");
+                            return;
+                        }
+                        
+                        // Validate it's HTML
+                        if (!htmlContent.includes('<') || !htmlContent.includes('>')) {
+                            if (!confirm("This doesn't look like HTML. Load anyway?")) {
+                                return;
+                            }
+                        }
+                        
+                        // Update status
+                        const statusIndicator = document.getElementById('pasteStatus');
+                        const statusText = document.getElementById('statusText');
+                        statusIndicator.classList.add('active');
+                        statusText.textContent = 'Processing HTML...';
+                        
+                        // Create blob URL and load
+                        setTimeout(() => {
+                            const blobUrl = createBlobUrlFromHTML(htmlContent);
+                            
+                            if (blobUrl) {
+                                Store.update('url', blobUrl);
+                                Store.updateSourceType('pasted');
+                                DeviceManager.render();
+                                
+                                statusText.textContent = 'HTML loaded successfully!';
+                                
+                                // Close modal after delay
+                                setTimeout(() => {
+                                    document.getElementById('pasteModal').classList.remove('active');
+                                    statusIndicator.classList.remove('active');
+                                    statusText.textContent = 'Ready to paste HTML';
+                                }, 800);
+                            } else {
+                                statusIndicator.classList.remove('active');
+                                statusText.textContent = 'Error loading HTML. Try again.';
+                                alert("Error creating HTML preview. Please check your HTML content.");
+                            }
+                        }, 300);
+                    });
+
+                    // Modal URL handling
+                    document.getElementById('btnModalGo').addEventListener('click', () => {
+                        let url = document.getElementById('modalUrlInput').value.trim();
+                        url = processURL(url);
+                        
+                        Store.update('url', url);
+                        Store.updateSourceType('url');
+                        DeviceManager.render();
+                        
+                        document.getElementById('pasteModal').classList.remove('active');
+                    });
+
+                    // Modal URL input enter key
+                    document.getElementById('modalUrlInput').addEventListener('keypress', (e) => {
+                        if (e.key === 'Enter') {
+                            document.getElementById('btnModalGo').click();
+                        }
+                    });
+
+                    // Tab switching in paste modal
+                    document.querySelectorAll('.url-tab').forEach(tab => {
+                        tab.addEventListener('click', () => {
+                            const tabName = tab.getAttribute('data-tab');
+                            this.switchTab(tabName);
+                        });
+                    });
+
+                    // Modals
+                    document.getElementById('btnHelp').onclick = () => document.getElementById('helpModal').classList.add('active');
+                    document.getElementById('btnData').onclick = () => {
+                        document.getElementById('dataModal').classList.add('active');
+                        document.getElementById('exportPreview').value = JSON.stringify(Store.state, null, 2);
+                    };
+                    
+                    // Modal Closes on Overlay Click
+                    document.querySelectorAll('.modal-overlay').forEach(overlay => {
+                        overlay.addEventListener('click', (e) => {
+                            if(e.target === overlay) overlay.classList.remove('active');
+                        });
+                    });
+
+                    // Export / Import
+                    document.getElementById('btnExport').onclick = () => {
+                        const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(Store.state));
+                        const downloadAnchorNode = document.createElement('a');
+                        downloadAnchorNode.setAttribute("href", dataStr);
+                        downloadAnchorNode.setAttribute("download", "viewport-config.json");
+                        document.body.appendChild(downloadAnchorNode);
+                        downloadAnchorNode.click();
+                        downloadAnchorNode.remove();
+                    };
+
+                    document.getElementById('fileImport').addEventListener('change', (e) => {
+                        const file = e.target.files[0];
+                        if (!file) return;
+                        const reader = new FileReader();
+                        reader.onload = (event) => {
+                            try {
+                                const obj = JSON.parse(event.target.result);
+                                Store.state = { ...DEFAULT_STATE, ...obj };
+                                Store.save();
+                                ThemeManager.apply(Store.state.theme);
+                                document.getElementById('themeSelector').value = Store.state.theme;
+                                document.getElementById('globalScale').value = Store.state.globalScale;
+                                
+                                // Update URL input appropriately
+                                if (Store.state.currentSourceType === 'pasted') {
+                                    document.getElementById('urlInput').value = '[Pasted HTML Content]';
+                                } else {
+                                    document.getElementById('urlInput').value = Store.state.url;
+                                }
+                                
+                                DeviceManager.render();
+                                document.getElementById('dataModal').classList.remove('active');
+                                alert("Workspace loaded successfully.");
+                            } catch(err) {
+                                alert("Invalid JSON file.");
+                            }
+                        };
+                        reader.readAsText(file);
+                    });
+
+                    // Auto-detect paste in textarea (Ctrl+V/Cmd+V)
+                    document.getElementById('htmlPasteArea').addEventListener('paste', (e) => {
+                        setTimeout(() => {
+                            const textarea = e.target;
+                            const content = textarea.value;
+                            if (content.length > 100) {
+                                const statusText = document.getElementById('statusText');
+                                statusText.textContent = `Ready to load (${content.length} characters)`;
+                            }
+                        }, 100);
+                    });
+
+                    // Window resize handling
+                    let resizeTimer;
+                    window.addEventListener('resize', () => {
+                        clearTimeout(resizeTimer);
+                        resizeTimer = setTimeout(() => {
+                            DeviceManager.render();
+                            // Close mobile sidebar on resize to larger screens
+                            if (window.innerWidth > 768 && Store.state.mobileSidebarOpen) {
+                                Store.state.mobileSidebarOpen = false;
+                                Store.updateMobileSidebar();
+                            }
+                        }, 250);
+                    });
+                },
+
+                // Tab switching function
+                switchTab(tabName) {
+                    // Update tabs
+                    document.querySelectorAll('.url-tab').forEach(tab => {
+                        if (tab.getAttribute('data-tab') === tabName) {
+                            tab.classList.add('active');
+                        } else {
+                            tab.classList.remove('active');
+                        }
+                    });
+                    
+                    // Update content
+                    document.querySelectorAll('.tab-content').forEach(content => {
+                        if (content.id === tabName + 'Tab') {
+                            content.classList.add('active');
+                        } else {
+                            content.classList.remove('active');
+                        }
+                    });
+                    
+                    // Update modal URL input with current URL if not pasted
+                    if (tabName === 'url' && Store.state.currentSourceType !== 'pasted') {
+                        document.getElementById('modalUrlInput').value = Store.state.url;
+                    } else if (tabName === 'url') {
+                        document.getElementById('modalUrlInput').value = '';
+                    }
+                }
+            };
+
+            // --- INIT ---
+            function init() {
+                Store.init();
+                ThemeManager.init();
+                UIManager.init();
+                
+                // Initial Render
+                if (Store.state.currentSourceType === 'pasted') {
+                    document.getElementById('urlInput').value = '[Pasted HTML Content]';
+                } else {
+                    document.getElementById('urlInput').value = Store.state.url;
+                }
+                DeviceManager.render();
+            }
+
+            // Public Methods for Inline HTML Event Handlers
+            return {
+                init,
+                remove: (id) => Store.removeDevice(id),
+                rotate: (id) => Store.rotateDevice(id),
+                closeMobileSidebar: () => {
+                    Store.state.mobileSidebarOpen = false;
+                    Store.updateMobileSidebar();
+                }
+            };
+
+        })();
+
+        // Start App
+        window.addEventListener('DOMContentLoaded', App.init);
+
+    </script>
+</body>
+</html>
