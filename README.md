@@ -270,36 +270,36 @@ Clicking this bookmarklet while on any website will open it in ViewportArchitect
 
 ```mermaid
 flowchart TD
-    Start[Start ViewportArchitect] --> LoadContent
-    LoadContent --> {Choose Input Method}
+    Start[Start ViewportArchitect] --> LoadContent[Load Content]
+    LoadContent --> InputMethod{Choose Input Method}
     
-    {Choose Input Method} --> URL[Enter URL]
-    {Choose Input Method} --> LocalFile[Load Local File]
-    {Choose Input Method} --> PasteHTML[Paste HTML Content]
+    InputMethod --> URL[Enter URL]
+    InputMethod --> LocalFile[Load Local File]
+    InputMethod --> PasteHTML[Paste HTML Content]
     
     URL --> ProcessURL[Process & Load]
     LocalFile --> ProcessFile[Convert to file:// URL]
     PasteHTML --> CreateBlob[Create Blob URL]
     
-    ProcessURL --> RenderViewports
+    ProcessURL --> RenderViewports[Render Viewports]
     ProcessFile --> RenderViewports
     CreateBlob --> RenderViewports
     
-    RenderViewports --> AddDevices
-    AddDevices --> {Device Selection}
+    RenderViewports --> AddDevices[Add Devices]
+    AddDevices --> DeviceSelection{Device Selection}
     
-    {Device Selection} --> Presets[Choose Presets]
-    {Device Selection} --> Custom[Create Custom]
+    DeviceSelection --> Presets[Choose Presets]
+    DeviceSelection --> Custom[Create Custom]
     
     Presets --> RenderAll[Render All Devices]
     Custom --> RenderAll
     
     RenderAll --> Adjust[Adjust & Test]
-    Adjust --> {Testing Actions}
+    Adjust --> TestingActions{Testing Actions}
     
-    {Testing Actions} --> Zoom[Adjust Zoom]
-    {Testing Actions} --> Rotate[Rotate Devices]
-    {Testing Actions} --> Compare[Compare Layouts]
+    TestingActions --> Zoom[Adjust Zoom]
+    TestingActions --> Rotate[Rotate Devices]
+    TestingActions --> Compare[Compare Layouts]
     
     Zoom --> Save[Save Workspace]
     Rotate --> Save
